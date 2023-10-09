@@ -23,12 +23,15 @@ namespace api.Services
         public async Task<List<User>> GetAsync() => await _userCollection.Find(_ => true).ToListAsync();
 
         // get user by id
-        public async Task<User> GetAsync(String id) => await _userCollection.Find(x => x.Id == id).FirstOrDefaultAsync();
+        public async Task<User> GetAsync(string id) => await _userCollection.Find(x => x.Id == id).FirstOrDefaultAsync();
+
+        // get user by email
+        public async Task<User> GetAsyncByEmail(string email) => await _userCollection.Find(x => x.Email == email).FirstOrDefaultAsync();
 
         // update user
         public async Task UpdateAsync(string id, User updateUser) => await _userCollection.ReplaceOneAsync(x => x.Id == id, updateUser);
 
         // delete user
-        public async Task RemoveAsync(String id) => await _userCollection.DeleteOneAsync(x => x.Id == id);
+        public async Task RemoveAsync(string id) => await _userCollection.DeleteOneAsync(x => x.Id == id);
     }
 }

@@ -37,17 +37,36 @@ namespace api.Controllers
             return user;
         }
 
+
         // POST api/user
         [HttpPost]
-        [Route("add")]
+        [Route("/api/auth/register")]
         public async Task<ActionResult<Object>> create(User newUser)
         {
             ApiResponse<object> apiResponse = new ApiResponse<object>();
 
-            await _userServices.CreateAsync(newUser);
-            apiResponse.Message = "User Created Successfully";
-            apiResponse.Data = newUser;
-            return CreatedAtAction(nameof(Get), new { id = newUser.Id }, apiResponse);
+            User user = await _userServices.GetAsyncByEmail(newUser.Email);
+
+            if (user != null)
+            {
+                apiResponse.StatusCode = 403;
+                apiResponse.Message = "User Already Exists";
+                apiResponse.Data = user;
+                return (apiResponse);
+            }
+            else
+            {
+                string password = newUser.Password;
+                string hashedPassword = BCrypt.Net.BCrypt.HashPassword(password, BCrypt.Net.BCrypt.GenerateSalt());
+
+                newUser.Password = hashedPassword;
+
+                await _userServices.CreateAsync(newUser);
+                apiResponse.StatusCode = 201;
+                apiResponse.Message = "User Created Successfully";
+                apiResponse.Data = newUser;
+                return CreatedAtAction(nameof(Get), new { id = newUser.Id }, apiResponse);
+            }
         }
 
         // PUT api/user/5
